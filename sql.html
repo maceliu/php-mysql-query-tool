@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+		<meta http-equiv="Content-Language" content="zh-cn" />
+		<title>sql查询器</title>
+		<style type="text/css">
+			html,body{ width: 100%; height: 100%; font-size: 12px; font-family: Arial, SimSun; }
+			body{ background:#EBE9ED; color:#393939; }
+			div,td{ word-wrap: break-word; word-break: break-all; }
+			.block{margin-top: 3px};
+		</style>
+		<script type="text/javascript" src='http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js'></script>
+	</head>
+	<body>
+		<form id="sql_form" name="sql_form" method="GET" action=''>
+			<div class="block">
+				服务器：
+				<select id="host" name="host">
+					<?php 
+						foreach ($host_arr as $key => $value) 
+						{
+							$selected = '';
+							if ($host == $value) 
+							{
+								$selected = 'selected="true"';
+							}
+							echo '<option value="'.$value.'" '.$selected.' >'.$value.'</option>';
+						}
+					?>
+				</select>&nbsp;&nbsp;
+				数据库：
+				<select id="database" name="database">
+					<?php 
+						foreach ($database_arr as $key => $value) 
+						{
+							$selected = '';
+							if ($database == $value) 
+							{
+								$selected = 'selected="true"';
+							}
+							echo '<option value="'.$value.'" '.$selected.' >'.$value.'</option>';
+						}
+					?>
+				</select>&nbsp;&nbsp;
+				当前时间戳：<input id="timestamp" name="timestamp" type="text" value="" />
+			</div>
+			<div class="block">
+				快捷句式：
+					<input class="pattern" type="button" value="SELECT" />
+					<input class="pattern" type="button" value="UPDATE" />
+					<input class="pattern" type="button" value="INSERT" />
+					<input class="pattern" type="button" value="DELETE" />
+					<input class="pattern" type="button" value="CREATE" />
+			</div>
+			<div class="block">
+				快捷操作：
+					<input class="operate" name="show tables" type="button" value="show tables" />
+			</div>
+			<div class="block">
+				<textarea id="sql" name="sql" style="width:800px;height:250px;"><?php echo $sql?></textarea>
+			</div>
+			<div class="block">
+				<input id="submit" name="submit" type="submit" value="查询" />
+			</div>
+		</form>
+
+		<div class="block"><span style="color:red"><?php if(!empty($notice)) echo $notice ?></span></div>
+		<div class="block"><?php if(!empty($head_html)) echo $head_html ?></div>
+		<div class="block"><?php if(!empty($table_html)) echo $table_html ?></div>
+
+		<script type="text/javascript">
+			$(document).ready(function() 
+			{
+				setInterval("time_refresh()","1000");
+				$('.pattern').click(function() 
+				{
+					var sql = "";
+					switch($(this).val())
+					{
+						case 'SELECT':
+							sql = 'SELECT * FROM table WHERE 1 ';
+							break;
+						case 'UPDATE':
+							sql = 'UPDATE `table` SET `id`=[value-1],`mobile`=[value-2] WHERE 1 ';
+							break;
+						case 'INSERT':
+							sql = 'INSERT INTO `table`(`key1`, `key2`) VALUES ([value-1],[value-2])';
+							break;
+						case 'DELETE':
+							sql = 'DELETE FROM `table` WHERE 1 ';
+							break;
+						case 'CREATE':
+							sql = 'show create table `table_name`';
+							break;
+						default:
+							sql = 'SELECT * FROM table WHERE 1 ';
+							break;
+					}
+					if (sql) 
+					{
+						$('#sql').text(sql);
+					};	
+				});
+
+				$('.operate').click(function() 
+				{
+					var sql = "";
+					switch($(this).val())
+					{
+						case 'show tables':
+							sql = 'SHOW TABLES';
+							break;
+						default:
+							sql = 'SELECT * FROM table WHERE 1 ';
+							break;
+					}
+					if (sql) 
+					{
+						$('#sql').text(sql);
+						$('#sql_form').submit();
+					};			
+				});
+			});
+
+			function time_refresh()
+			{
+				var time = Math.round(new Date().getTime()/1000);
+				$('#timestamp').val(time);
+			}
+		</script>
+
+	</body>
+
+</html>
