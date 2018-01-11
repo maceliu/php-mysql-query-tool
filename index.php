@@ -11,7 +11,6 @@ $sql = empty($_GET['sql']) ? '' : $_GET['sql'];
 $notice = '';
 //根据传入参数从配置数组中按选择选择服务器和对应数据库
 $host_arr = array_keys($database_config_arr);
-// print_r($host_arr);
 $database_arr = array();
 foreach ($database_config_arr as $key => $value) 
 {
