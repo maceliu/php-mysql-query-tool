@@ -16,9 +16,11 @@ abstract class database {
 
 	
 
-	/*数据库连接*/
-	abstract protected function connect(); 
-	
+	/*创建数据库连接*/
+	abstract protected function _connect(); 
+
+	/*关闭数据库连接*/
+	abstract protected function _close(); 
 
 }
 ?>

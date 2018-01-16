@@ -35,12 +35,12 @@ class PdoMysql extends database
         self::$dbpass = $pass;
         self::$connect = true;
         self::$charset = $charset;
-        if(self::connect())
+        if(self::_connect())
         {
             self::$DB->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY,true);
             self::$DB->setAttribute(PDO::ATTR_EMULATE_PREPARES,true);
             $this->sql = 'SET NAMES ' . self::$charset;
-            self::execute();
+            self::_execute();
         }
     }
 
@@ -49,7 +49,7 @@ class PdoMysql extends database
      */
     public function __destruct() 
     {
-        self::close();
+        self::_close();
     }
      
     /*********************基本方法开始********************/
@@ -58,7 +58,7 @@ class PdoMysql extends database
      * 创建连接数据库
      * @return bool 连接是否成功  true=>成功   false=>失败
      */
-    protected function connect() 
+    protected function _connect() 
     {
         try 
         {
@@ -75,7 +75,7 @@ class PdoMysql extends database
     /**
      * 关闭数据连接
      */
-    public function close() 
+    public function _close() 
     {
         self::$DB = null;
     }
@@ -84,7 +84,7 @@ class PdoMysql extends database
      * 执行一条SQL语句，并返回受影响的行数
      * @return int 执行语句影响行数
      */
-    private function execute() 
+    private function _execute() 
     {
         $result = self::$DB->exec($this->sql);
         if(self::getPDOError($this->sql)) return false;
@@ -96,7 +96,7 @@ class PdoMysql extends database
      * @param $type int 操作类型  0获取1条  1获取全部
      * @return array=>正常查询结果   bool(false)=>查询失败
      */
-    private function fetch($type=1)
+    private function _fetch($type=1)
     {
         $result = array();
         self::$stmt = self::$DB->query($this->sql);
@@ -161,7 +161,7 @@ class PdoMysql extends database
         $code = self::getCode($table,$args);
         $sql .= $code;
         $this->sql = $sql;
-        return self::execute();
+        return self::_execute();
     }
      
     /**
@@ -178,7 +178,7 @@ class PdoMysql extends database
         $sql .= $code;
         $sql .= " Where $where ";
         $this->sql = $sql;
-        return self::execute();
+        return self::_execute();
     }
      
     /**
@@ -191,7 +191,7 @@ class PdoMysql extends database
     {
         $sql = "DELETE FROM `$table` Where $where";
         $this->sql = $sql;
-        return self::execute();
+        return self::_execute();
     }
 
     /**
@@ -202,7 +202,7 @@ class PdoMysql extends database
     public function getOne($sql) 
     {
         $this->sql = $sql;
-        return self::fetch ($type = 0);
+        return self::_fetch ($type = 0);
     }
 
     /**
@@ -213,7 +213,7 @@ class PdoMysql extends database
     public function getAll($sql) 
     {
         $this->sql = $sql;
-        return self::fetch();
+        return self::_fetch();
     }
 
 
