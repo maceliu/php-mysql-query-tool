@@ -39,8 +39,8 @@ class PdoMysql extends database
         {
             self::$DB->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY,true);
             self::$DB->setAttribute(PDO::ATTR_EMULATE_PREPARES,true);
-            $this->sql = 'SET NAMES ' . self::$charset;
-            self::_execute();
+            $sql = 'SET NAMES ' . self::$charset;
+            self::_query($sql);
         }
     }
 
@@ -80,15 +80,18 @@ class PdoMysql extends database
         self::$DB = null;
     }
 
+
     /**
-     * 执行一条SQL语句，并返回受影响的行数
-     * @return int 执行语句影响行数
+     * 执行一条SQL语句，并返回结果的数据
+     * @param $type int 操作类型  0获取1条  1获取全部
+     * @return array=>正常查询结果   bool(false)=>查询失败
      */
-    private function _execute() 
+    public function _query($sql)
     {
-        $result = self::$DB->exec($this->sql);
-        if(self::getPDOError($this->sql)) return false;
-        return $result;
+        $this->sql = $sql;
+        self::$stmt = self::$DB->query($this->sql);
+        if(self::getPDOError()) return false;
+        return self::$stmt;
     }
 
     /**
@@ -96,25 +99,28 @@ class PdoMysql extends database
      * @param $type int 操作类型  0获取1条  1获取全部
      * @return array=>正常查询结果   bool(false)=>查询失败
      */
-    private function _fetch($type=1)
+    protected function _fetch($type='all')
     {
         $result = array();
-        self::$stmt = self::$DB->query($this->sql);
-        //如果有查询错误，则返回FALSE
-        if(self::getPDOError($this->sql)) return false;
         self::$stmt->setFetchMode(PDO::FETCH_ASSOC);
         switch ($type)
         {
-            case 0 :
+            case 'one':
                 $result = self::$stmt->fetch();
                 break;
-            case 1 :
+            case 'all':
                 $result = self::$stmt->fetchAll();
                 break;
+            default:
+                return false;
         }
         return $result;
     }
 
+
+
+
+    
     /**
      * 返回最后插入行的ID或序列值
      * @return int ID或序列值
@@ -201,8 +207,15 @@ class PdoMysql extends database
      */
     public function getOne($sql) 
     {
-        $this->sql = $sql;
-        return self::_fetch ($type = 0);
+        self::$stmt = $this->_query($sql);
+        if (self::$stmt) 
+        {
+            return $this->_fetch('one');
+        }
+        else
+        {
+            return false;
+        }
     }
 
     /**
@@ -212,8 +225,15 @@ class PdoMysql extends database
      */
     public function getAll($sql) 
     {
-        $this->sql = $sql;
-        return self::_fetch();
+        self::$stmt = $this->_query($sql);
+        if (self::$stmt) 
+        {
+            return $this->_fetch();
+        }
+        else
+        {
+            return false;
+        }
     }
 
 
@@ -242,7 +262,7 @@ class PdoMysql extends database
      * 返回:出错信息
      * 类型:字串
      */
-    private function getPDOError($sql) 
+    private function getPDOError() 
     {
         if (self::$DB->errorCode () != '00000') 
         {

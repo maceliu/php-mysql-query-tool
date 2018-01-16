@@ -22,5 +22,12 @@ abstract class database {
 	/*关闭数据库连接*/
 	abstract protected function _close(); 
 
+	/*对数据库执行一次查询*/
+	abstract public function _query($sql); 
+
+	/*从结果集中获取下一行*/
+	abstract protected function _fetch(); 
+
+
 }
 ?>
