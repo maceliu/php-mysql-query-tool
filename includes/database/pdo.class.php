@@ -3,7 +3,9 @@
  *  PDO操作MYSQL数据库类
  *  @author liubo  2017-06-20
  */
-class PdoMysql 
+require_once dirname(__FILE__).'/database.class.php';
+
+class PdoMysql extends database
 {
     public static $dbtype = 'mysql';
     public static $dbhost = '';
@@ -19,7 +21,7 @@ class PdoMysql
     private static $parms = array ();
     public $error_info = '';
     public $sql = '';
-     
+    
     /**
      * 构造函数
      */
@@ -56,7 +58,7 @@ class PdoMysql
      * 创建连接数据库
      * @return bool 连接是否成功  true=>成功   false=>失败
      */
-    private function connect() 
+    protected function connect() 
     {
         try 
         {

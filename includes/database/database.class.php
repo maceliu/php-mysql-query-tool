@@ -18,7 +18,6 @@ abstract class database {
 
 	/*数据库连接*/
 	abstract protected function connect(); 
-
 	
 
 }
