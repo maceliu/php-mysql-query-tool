@@ -1,12 +1,12 @@
 <?php
-/*
-掌握满足单例模式的必要条件
-(1)私有的构造方法-为了防止在类外使用new关键字实例化对象
-(2)私有的成员属性-为了防止在类外引入这个存放对象的属性
-(3)私有的克隆方法-为了防止在类外通过clone成生另一个对象
-(4)公有的静态方法-为了让用户进行实例化对象的操作
-*/
-class ConnectMysqli
+/**
+ *  PDO操作MYSQL数据库类
+ *  @author liubo  2017-06-20
+ */
+require_once dirname(__FILE__).'/database.class.php';
+
+
+class ConnectMysqli extends database
 {
     //私有的属性
     private static $dbcon=false;
@@ -33,14 +33,15 @@ class ConnectMysqli
         //连接数据库
         if ($this->connect()) 
         {
-            //选择数据库
-            $this->db_usedb();
             //设置字符集
-            $this->db_charset();
+            mysqli_query($this->link,"set names {$this->charset}");
+            //选择数据库
+            mysqli_query($this->link,"use {$this->db}");
         }
     }
+
     //连接数据库
-    private function connect()
+    private function _connect()
     {
         mysqli_report(MYSQLI_REPORT_STRICT);
         try
@@ -55,19 +56,8 @@ class ConnectMysqli
         }
     }
 
-    //设置字符集
-    private function db_charset()
-    {
-        mysqli_query($this->link,"set names {$this->charset}");
-    }
-    //选择数据库
-    private function db_usedb()
-    {
-        mysqli_query($this->link,"use {$this->db}");
-    }
-
     //执行sql语句的方法
-    public function query($sql)
+    public function _query($sql)
     {
         $res=mysqli_query($this->link,$sql);
         if(!$res)
@@ -84,6 +74,7 @@ class ConnectMysqli
     {
         return mysqli_insert_id($this->link);
     }
+    
     /**
      * 查询某个字段
      * @param
@@ -121,7 +112,7 @@ class ConnectMysqli
     //获取多条数据，二维数组
     public function getAll($sql)
     {
-        $query=$this->query($sql);
+        $query = $this->query($sql);
         $list=array();
         while ($r=$this->getFormSource($query)) 
         {
