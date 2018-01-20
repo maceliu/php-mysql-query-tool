@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL);
 
+
 require_once dirname(__FILE__).'/includes/function.inc.php';
 require_once dirname(__FILE__).'/includes/database/pdo.class.php';
 require_once dirname(__FILE__).'/config.php';
