@@ -9,8 +9,7 @@ require_once dirname(__FILE__).'/database.class.php';
 class ConnectMysqli extends database
 {
     //私有的属性
-    private static $dbcon=false;
-    private $host;
+    private $db_host;
     private $port;
     private $host_port;
     private $user;
@@ -34,9 +33,9 @@ class ConnectMysqli extends database
         if ($this->connect()) 
         {
             //设置字符集
-            mysqli_query($this->link,"set names {$this->charset}");
+            $this->_query("set names {$this->charset}");
             //选择数据库
-            mysqli_query($this->link,"use {$this->db}");
+            $this->_query("use {$this->db}");
         }
     }
 
