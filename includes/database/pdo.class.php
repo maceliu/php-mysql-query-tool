@@ -7,39 +7,26 @@ require_once dirname(__FILE__).'/database.class.php';
 
 class PdoMysql extends database
 {
-    public static $dbtype = 'mysql';
-    public static $dbhost = '';
-    public static $dbport = '';
-    public static $dbname = '';
-    public static $dbuser = '';
-    public static $dbpass = '';
-    public static $charset = '';
+    public static $db_type = 'mysql';
     public static $stmt = null;
-    public static $DB = null;
     public static $connect = true; // 是否長连接
-    public static $debug =  1;
-    private static $parms = array ();
-    public $error_info = '';
-    public $sql = '';
     
     /**
      * 构造函数
      */
-    public function __construct($host,$port,$user,$pass,$db,$charset='utf8') 
+    public function __construct($db_host,$db_port,$db_user,$db_pass,$db_database,$charset='utf8') 
     {
-        self::$dbtype = 'mysql';
-        self::$dbhost = $host;
-        self::$dbport = $port;
-        self::$dbname = $db;
-        self::$dbuser = $user;
-        self::$dbpass = $pass;
-        self::$connect = true;
-        self::$charset = $charset;
+        $this->db_host = $db_host;
+        $this->db_port = $db_port;
+        $this->db_user = $db_user;
+        $this->db_pass = $db_pass;
+        $this->db_name = $db_database;
+        $this->charset = $charset;
         if(self::_connect())
         {
-            self::$DB->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY,true);
-            self::$DB->setAttribute(PDO::ATTR_EMULATE_PREPARES,true);
-            $sql = 'SET NAMES ' . self::$charset;
+            $this->DB->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY,true);
+            $this->DB->setAttribute(PDO::ATTR_EMULATE_PREPARES,true);
+            $sql = 'SET NAMES ' . $this->charset;
             self::_query($sql);
         }
     }
@@ -62,7 +49,7 @@ class PdoMysql extends database
     {
         try 
         {
-            self::$DB = new PDO(self::$dbtype . ':host=' . self::$dbhost . ';port=' . self::$dbport . ';dbname=' . self::$dbname, self::$dbuser, self::$dbpass, array (PDO::ATTR_PERSISTENT => self::$connect));
+            $this->DB = new PDO(self::$db_type . ':host=' . $this->db_host . ';port=' . $this->db_port . ';dbname=' . $this->db_name, $this->db_user, $this->db_pass, array (PDO::ATTR_PERSISTENT => self::$connect));
             return true;
         }
         catch(PDOException $e)
@@ -77,7 +64,7 @@ class PdoMysql extends database
      */
     public function _close() 
     {
-        self::$DB = null;
+        $this->DB = null;
     }
 
 
@@ -89,8 +76,8 @@ class PdoMysql extends database
     public function _query($sql)
     {
         $this->sql = $sql;
-        self::$stmt = self::$DB->query($this->sql);
-        if(self::getPDOError()) return false;
+        self::$stmt = $this->DB->query($this->sql);
+        if(self::isError()) return false;
         return self::$stmt;
     }
 
@@ -127,7 +114,7 @@ class PdoMysql extends database
      */
     public function getInsertId() 
     {
-        return self::$DB->lastInsertId();
+        return $this->DB->lastInsertId();
     }
     
     /**
@@ -248,42 +235,19 @@ class PdoMysql extends database
      
 
     /*********************错误处理********************/
-
-    /**
-     * 设置是否为调试模式
-     */
-    public function setDebugMode($mode = true) 
-    {
-        return ($mode == true) ? self::$debug = true : self::$debug = false;
-    }
      
     /**
      * 捕获PDO错误信息
      * 返回:出错信息
      * 类型:字串
      */
-    private function getPDOError() 
+    private function isError() 
     {
-        if (self::$DB->errorCode () != '00000') 
+        if ($this->DB->errorCode () != '00000') 
         {
-            $info = (self::$stmt) ? self::$stmt->errorInfo () : self::$DB->errorInfo ();
+            $info = (self::$stmt) ? self::$stmt->errorInfo () : $this->DB->errorInfo ();
             // self::sqlError( 'mySQL Query Error', $info [2], $sql );
             $this->error_info = 'mySQL Query Error'.$info [2];
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    private function getSTMTError($sql) 
-    {
-        if (self::$stmt->errorCode () != '00000') 
-        {
-            $info = (self::$stmt) ? self::$stmt->errorInfo () : self::$DB->errorInfo ();
-            // echo (self::sqlError ( 'mySQL Query Error', $info [2], $sql ));
-            self::$error_info = 'mySQL Query Error'.$info [2].$sql;
             return true;
         }
         else
@@ -297,7 +261,7 @@ class PdoMysql extends database
      * 返回:错误信息详情
      * 类型:str
      */
-    public function getError() 
+    public function getErrorInfo() 
     {
         return $this->error_info;
     }
@@ -346,7 +310,7 @@ class PdoMysql extends database
             $html .= ' ErrorSQL: ' . $sql;
         }
         // self::errorFile($html);
-        if(self::$debug) throw new Exception($html);
+        if($this->error_reporting) throw new Exception($html);
     }
 
 }

@@ -1,10 +1,7 @@
 <?php
-error_reporting(E_ALL);
-
-
+require_once dirname(__FILE__).'/config.php';
 require_once dirname(__FILE__).'/includes/function.inc.php';
 require_once dirname(__FILE__).'/includes/database/pdo.class.php';
-require_once dirname(__FILE__).'/config.php';
 //获取传参
 $host = _getRequest('host','localhost');
 $database = _getRequest('database','php_test');
@@ -53,7 +50,7 @@ else
 			//如果查询结果不是数组说明执行报错，尝试获取报错信息
 			if ($item_list === false)
 			{
-				$notice = $db->getError();
+				$notice = $db->getErrorInfo();
 			}
 			else
 			{	

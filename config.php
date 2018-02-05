@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL);
 ini_set('date.timezone','Asia/Shanghai');  //设置时区
 //数据库连接配置信息数组
 $database_config_arr = array();
