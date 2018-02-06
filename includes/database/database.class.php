@@ -2,7 +2,7 @@
 
 abstract class database {
 
-    public  $db_host; //数据库主机
+    public $db_host; //数据库主机
     public $db_port; //数据库使用的端口号
     public $db_user; //数据库用户名
     public $db_pwd; //数据库用户名密码
@@ -10,7 +10,7 @@ abstract class database {
     public $conn; //数据库连接标识;
     public $result; //执行query命令的结果资源标识
     public $sql = ''; //sql执行语句
-    public $row; //返回的条目数
+    public $query; //返回的条目数
     public $charset; //数据库编码，GBK,UTF8,gb2312
     public $error_reporting = true; //报错等级
     public $DB = NULL; //数据库链接句柄
@@ -42,11 +42,30 @@ abstract class database {
 	/*从结果集中获取下一行*/
 	abstract protected function _fetch(); 
 
+    /**
+     * 作用:获取错误信息
+     * 返回:错误信息详情
+     * 类型:str
+     */
+    public function getErrorInfo() 
+    {
+        return $this->error_info;
+    }
+
+
 
 	//获取多条数据，二维数组
     public function getAll($sql)
     {
-       
+        $query_result = $this->_query($sql);
+        if ($query_result && $this->query) 
+        {
+            return $this->_fetch('all');
+        }
+        else
+        {
+            return false;
+        }
     }
 
 
@@ -59,7 +78,15 @@ abstract class database {
      */
     public function getOne($sql) 
     {
-
+        $query_result = $this->_query($sql);
+        if ($query_result && $this->query) 
+        {
+            return $this->_fetch('one');
+        }
+        else
+        {
+            return false;
+        }
     }
 
 

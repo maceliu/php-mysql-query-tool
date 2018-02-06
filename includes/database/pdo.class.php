@@ -8,7 +8,6 @@ require_once dirname(__FILE__).'/database.class.php';
 class PdoMysql extends database
 {
     public static $db_type = 'mysql';
-    public static $stmt = null;
     public static $connect = true; // 是否長连接
     
     /**
@@ -76,33 +75,40 @@ class PdoMysql extends database
     public function _query($sql)
     {
         $this->sql = $sql;
-        self::$stmt = $this->DB->query($this->sql);
+        $this->query = $this->DB->query($this->sql);
         if(self::isError()) return false;
-        return self::$stmt;
+        return true;
     }
+
+
 
     /**
      * 执行一条SQL语句，并返回结果的数据
      * @param $type int 操作类型  0获取1条  1获取全部
      * @return array=>正常查询结果   bool(false)=>查询失败
      */
-    protected function _fetch($type='all')
+    protected function _fetch($type='one')
     {
         $result = array();
-        self::$stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $this->query->setFetchMode(PDO::FETCH_ASSOC);
         switch ($type)
         {
             case 'one':
-                $result = self::$stmt->fetch();
+                $result = $this->query->fetch();
                 break;
             case 'all':
-                $result = self::$stmt->fetchAll();
+                $result = $this->query->fetchAll();
                 break;
             default:
                 return false;
         }
         return $result;
     }
+
+
+
+
+
 
 
 
@@ -194,8 +200,8 @@ class PdoMysql extends database
      */
     public function getOne($sql) 
     {
-        self::$stmt = $this->_query($sql);
-        if (self::$stmt) 
+        $query_result = $this->_query($sql);
+        if ($query_result && $this->query) 
         {
             return $this->_fetch('one');
         }
@@ -205,23 +211,23 @@ class PdoMysql extends database
         }
     }
 
-    /**
-     * 执行SQL返回所有
-     * @param $sql string 要执行的SQL
-     * @return array 查询结果  二维数组
-     */
-    public function getAll($sql) 
-    {
-        self::$stmt = $this->_query($sql);
-        if (self::$stmt) 
-        {
-            return $this->_fetch();
-        }
-        else
-        {
-            return false;
-        }
-    }
+    // /**
+    //  * 执行SQL返回所有
+    //  * @param $sql string 要执行的SQL
+    //  * @return array 查询结果  二维数组
+    //  */
+    // public function getAll($sql) 
+    // {
+    //     $query_result = $this->_query($sql);
+    //     if ($query_result && $this->query) 
+    //     {
+    //         return $this->_fetch('all');
+    //     }
+    //     else
+    //     {
+    //         return false;
+    //     }
+    // }
 
 
     /**
@@ -230,7 +236,7 @@ class PdoMysql extends database
      */
     public function getRowCount() 
     {
-        return self::$stmt->rowCount();
+        return $this->query->rowCount();
     }
      
 
@@ -245,9 +251,9 @@ class PdoMysql extends database
     {
         if ($this->DB->errorCode () != '00000') 
         {
-            $info = (self::$stmt) ? self::$stmt->errorInfo () : $this->DB->errorInfo ();
+            $info = ($this->query) ? $this->query->errorInfo () : $this->DB->errorInfo ();
             // self::sqlError( 'mySQL Query Error', $info [2], $sql );
-            $this->error_info = 'mySQL Query Error'.$info [2];
+            $this->error_info = 'MySQL Query Error : '.$info [2];
             return true;
         }
         else
@@ -256,15 +262,7 @@ class PdoMysql extends database
         }
     }
 
-    /**
-     * 作用:获取错误信息
-     * 返回:错误信息详情
-     * 类型:str
-     */
-    public function getErrorInfo() 
-    {
-        return $this->error_info;
-    }
+    
 
      
     /**
