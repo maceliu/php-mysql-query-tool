@@ -81,24 +81,7 @@ class ConnectMysqli extends database
     {
         mysqli_close($this->DB);
     }
-
-    //获得最后一条记录id
-    public function getInsertId()
-    {
-        return mysqli_insert_id($this->DB);
-    }
     
-    /**
-     * 查询某个字段
-     * @param
-     * @return string or int
-     */
-    public function getOne($sql)
-    {
-        $query=$this->query($sql);
-        return mysqli_free_result($query);
-    }
-
     /**
      * 返回上一次执行的SQL影响的数据行数
      * @return int 影响行数

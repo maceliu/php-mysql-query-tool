@@ -92,17 +92,46 @@ abstract class database {
 
 
     /**
-    * 定义添加数据的方法
-    * @param string $table 表名
-    * @param string orarray $data [数据]
-    * @return int 最新添加的id
-    */
-    public function insert($table,$data)
+     * 获取要操作的数据SQL
+     * @param $table string 表名
+     * @param $args  array  数据
+     * @return string 生成的SQL
+     */
+    private function getCode($table,$args) 
     {
-        
+        $code = '';
+        if (is_array($args)) 
+        {
+            foreach ($args as $k => $v) 
+            {
+                if ($v == '') {
+                    continue;
+                }
+                $code .= "`$k`='$v',";
+            }
+        }
+        $code = substr($code,0,-1);
+        return $code;
     }
 
 
+
+
+    /**
+     * 向指定表写入数据
+     * @param $table string 表名
+     * @param $args  array  数据
+     * @return int 插入的数据ID
+     */
+    public function add($table, $args) 
+    {
+        $sql = "INSERT INTO `$table` SET ";
+        $code = self::getCode($table,$args);
+        $sql .= $code;
+        $this->sql = $sql;
+        return self::_execute();
+    }
+     
     /**
      * 更新数据
      * @param $table string 表名
@@ -112,10 +141,14 @@ abstract class database {
      */
     public function update($table, $args, $where) 
     {
-
+        $code = self::getCode($table,$args);
+        $sql = "UPDATE `$table` SET ";
+        $sql .= $code;
+        $sql .= " Where $where ";
+        $this->sql = $sql;
+        return self::_execute();
     }
-
-
+     
     /**
      * 删除数据
      * @param $table string 表名
@@ -124,8 +157,35 @@ abstract class database {
      */
     public function delete($table, $where) 
     {
-
+        $sql = "DELETE FROM `$table` Where $where";
+        $this->sql = $sql;
+        return self::_execute();
     }
+
+
+    /**
+     * 写入错误日志
+     */
+    private function errorFile($error_info) 
+    {
+        if (!is_dir(MYSQL_ERROR_PATH)) 
+        {
+            mkdir(MYSQL_ERROR_PATH);
+        }
+        $errorfile = MYSQL_ERROR_PATH.'mysql_error_'.date('Ymd').'.log';
+        $sql = str_replace(array("\n","\r","\t","  ","  ","  "), array(" "," "," "," "," "," "),$sql);
+        if (!file_exists($errorfile))
+        {
+            $fp = file_put_contents ( $errorfile, "\n" . date('Y-m-d H:i:s').' '.$error_info );
+        } 
+        else 
+        {
+            $fp = file_put_contents ( $errorfile, "\n" . date('Y-m-d H:i:s').' '.$error_info , FILE_APPEND );
+        }
+    }
+
+
+    
 
 
 

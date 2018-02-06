@@ -3,6 +3,7 @@ require_once dirname(__FILE__).'/config.php';
 require_once dirname(__FILE__).'/includes/function.inc.php';
 require_once dirname(__FILE__).'/includes/database/pdo.class.php';
 require_once dirname(__FILE__).'/includes/database/mysqli.class.php';
+require_once dirname(__FILE__).'/includes/database/mysql.class.php';
 //获取传参
 $host = _getRequest('host','localhost');
 $database = _getRequest('database','php_test');
@@ -34,6 +35,7 @@ else
 		//连接数据库
 		$db = new PdoMysql($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
 		// $db = new ConnectMysqli($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
+		// $db = new Mysql($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
 		if ($db->error_info) 
 		{
 			$notice = $db->error_info;

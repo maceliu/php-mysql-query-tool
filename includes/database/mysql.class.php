@@ -1,20 +1,14 @@
 <?php
+/**
+ *  Mysql方式操作MYSQL数据库类
+ *  @author liubo  2017-06-20
+ */
+require_once dirname(__FILE__).'/database.class.php';
 
-class mysql {
+class Mysql extends database
+{
 
-	private $db_host; //数据库主机
-	private $db_port; //数据库使用的端口号
-	private $db_user; //数据库用户名
-	private $db_pwd; //数据库用户名密码
-	private $db_database; //数据库名
-	private $conn; //数据库连接标识;
-	private $result; //执行query命令的结果资源标识
-	private $sql; //sql执行语句
-	private $row; //返回的条目数
-	private $coding; //数据库编码，GBK,UTF8,gb2312
-	private $bulletin = true; //是否开启错误记录
-	private $show_error = false; //测试阶段，显示所有错误,具有安全隐患,默认关闭
-	private $is_error = false; //发现错误是否立即终止,默认true,建议不启用，因为当有问题时用户什么也看不到是很苦恼的
+	public $conn; //数据库连接标识;
 
 	/*构造函数*/
 	public function __construct($db_host,$db_port, $db_user, $db_pwd, $db_database, $coding='utf8', $conn='pconn')
@@ -25,89 +19,92 @@ class mysql {
 		$this->db_database = $db_database;
 		$this->conn = $conn;
 		$this->coding = $coding;
-		$this->connect();
+		$this->_connect();
 	}
 
-
 	/*数据库连接*/
-	public function connect() 
+	protected function _connect() 
 	{
 		if ($this->conn == "pconn") {
 			//永久链接
-			$this->conn = mysql_pconnect($this->db_host, $this->db_user, $this->db_pwd);
+			$this->DB = mysql_pconnect($this->db_host, $this->db_user, $this->db_pwd);
 		} else {
 			//即使链接
-			$this->conn = mysql_connect($this->db_host, $this->db_user, $this->db_pwd);
+			$this->DB = mysql_connect($this->db_host, $this->db_user, $this->db_pwd);
 		}
 
-		if (!mysql_select_db($this->db_database, $this->conn)) {
-			if ($this->show_error) {
-				$this->show_error("数据库不可用：", $this->db_database);
-			}
+		if (!mysql_select_db($this->db_database, $this->DB)) {
+			$this->error_info = mysql_errno() . mysql_error();
+			return false;
 		}
 		mysql_query("SET NAMES $this->coding");
+		return true;
 	}
 
 	/*数据库执行语句，可执行查询添加修改删除等任何sql语句*/
-	public function query($sql) 
+	public function _query($sql) 
 	{
-		if ($sql == "") {
-			$this->show_error("SQL语句错误：", "SQL查询语句为空");
+		if (empty($sql)) {
+			$this->error_info = "SQL语句错误：SQL查询语句为空";
+			return false;
 		}
-		if($sql){
-			$this->sql = $sql;
-		}
-		else
+
+		$this->sql = $sql;
+
+		$this->query = mysql_query($this->sql, $this->DB);
+
+		if (!$this->query) 
 		{
-			exit('SQL_str error!');
-		}
+			$this->error_info = "错误SQL语句：" . mysql_errno() . mysql_error();
+			return false;
+		} 
 
-		$result = mysql_query($this->sql, $this->conn);
-
-		if (!$result) {
-			//调试中使用，sql语句出错时会自动打印出来
-			if ($this->show_error) {
-				$this->show_error("错误SQL语句：", $this->sql);
-			}
-		} else {
-			$this->result = $result;
-		}
-		return $this->result;
+		return true;
 	}
-	
-
-
-	/*
-	mysql_fetch_row()    array  $row[0],$row[1],$row[2]
-	mysql_fetch_array()  array  $row[0] 或 $row[id]
-	mysql_fetch_assoc()  array  用$row->content 字段大小写敏感
-	mysql_fetch_object() object 用$row[id],$row[content] 字段大小写敏感
-	*/
 
 	//获取关联数组,使用$row['字段名']
-	public function fetch_assoc() {
-		return mysql_fetch_assoc($this->result);
-	}
-
-
-
-
-
-	//数据库选择
-	public function select_db($db_database) 
+	public function _fetch($type='one') 
 	{
-		return mysql_select_db($db_database);
+		$result = array();
+        switch ($type)
+        {
+            case 'one':
+                $result = mysql_fetch_assoc($this->query);
+                break;
+            case 'all':
+                while ($result_temp = mysql_fetch_assoc($this->query)) 
+                {
+                    $result[] = $result_temp;
+                }
+                break;
+            default:
+            	$this->error_info = '获取fetch错误！';
+                return false;
+        }
+        return $result;
 	}
-	
+
+	//获取关联数组,使用$row['字段名']
+	public function _close() 
+	{
+		mysql_close($this->DB);
+	}
+
+	/**
+     * 返回上一次执行的SQL影响的数据行数
+     * @return int 影响行数
+     */
+    public function getRowCount() 
+    {
+        return mysql_affected_rows();
+    }
+
 
 	//析构函数，自动关闭数据库,垃圾回收机制
-	public function __destruct() {
-		if (!empty ($this->result)) {
-			$this->free();
-		}
-		mysql_close($this->conn);
+	public function __destruct() 
+	{
+		$this->_close();
 	}
-
 
 
 
