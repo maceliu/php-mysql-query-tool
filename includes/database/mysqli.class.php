@@ -1,13 +1,13 @@
 <?php
 /**
- *  PDO操作MYSQL数据库类
+ *  Mysqli操作MYSQL数据库类
  *  @author liubo  2017-06-20
  */
-require_once dirname(__FILE__).'/database.class.php';
+require_once dirname(__FILE__).'/MysqlDriver.class.php';
 
-
-class ConnectMysqli extends database
+class MysqliMysqlDriver extends MysqlDriver
 {
+    
     public static $db_host_port = '';
 
     //私有的构造方法
@@ -44,7 +44,7 @@ class ConnectMysqli extends database
     }
 
     //执行sql语句的方法
-    public function _query($sql)
+    protected function _query($sql)
     {
         $this->query = mysqli_query($this->DB,$sql);
         if(!$this->query)
@@ -56,7 +56,7 @@ class ConnectMysqli extends database
     }
 
     //执行sql语句的方法
-    public function _fetch($type='one')
+    protected function _fetch($type='one')
     {
         $result = array();
         switch ($type)
@@ -77,7 +77,7 @@ class ConnectMysqli extends database
     }
 
     //执行sql语句的方法
-    public function _close()
+    protected function _close()
     {
         mysqli_close($this->DB);
     }

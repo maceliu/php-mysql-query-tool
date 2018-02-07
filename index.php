@@ -33,9 +33,9 @@ else
 	if (!empty($sql)) 
 	{
 		//连接数据库
-		$db = new PdoMysql($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
-		// $db = new ConnectMysqli($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
-		// $db = new Mysql($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
+		$db = new PdoMysqlDriver($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
+		// $db = new MysqliMysqlDriver($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
+		// $db = new MysqlMysqlDriver($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
 		if ($db->error_info) 
 		{
 			$notice = $db->error_info;

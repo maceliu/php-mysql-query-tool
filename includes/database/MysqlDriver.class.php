@@ -1,6 +1,11 @@
 <?php
+/**
+ *  MYSQL操作抽象类
+ *  @author liubo  2017-06-20
+ */
 
-abstract class database {
+abstract class MysqlDriver 
+{
 
     public $db_host; //数据库主机
     public $db_port; //数据库使用的端口号
@@ -28,8 +33,6 @@ abstract class database {
 		// $this->connect();
 	}
 
-	
-
 	/*创建数据库连接*/
 	abstract protected function _connect(); 
 
@@ -37,7 +40,7 @@ abstract class database {
 	abstract protected function _close(); 
 
 	/*对数据库执行一次查询*/
-	abstract public function _query($sql); 
+	abstract protected function _query($sql); 
 
 	/*从结果集中获取下一行*/
 	abstract protected function _fetch(); 
@@ -52,8 +55,6 @@ abstract class database {
         return $this->error_info;
     }
 
-
-
 	//获取多条数据，二维数组
     public function getAll($sql)
     {
@@ -67,9 +68,6 @@ abstract class database {
             return false;
         }
     }
-
-
-
 
     /**
      * 执行SQL返回第一条数据
@@ -88,8 +86,6 @@ abstract class database {
             return false;
         }
     }
-
-
 
     /**
      * 获取要操作的数据SQL
@@ -113,9 +109,6 @@ abstract class database {
         $code = substr($code,0,-1);
         return $code;
     }
-
-
-
 
     /**
      * 向指定表写入数据
@@ -162,7 +155,6 @@ abstract class database {
         return self::_execute();
     }
 
-
     /**
      * 写入错误日志
      */
@@ -183,13 +175,6 @@ abstract class database {
             $fp = file_put_contents ( $errorfile, "\n" . date('Y-m-d H:i:s').' '.$error_info , FILE_APPEND );
         }
     }
-
-
-    
-
-
-
-
 }
 
 

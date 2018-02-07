@@ -1,14 +1,14 @@
 <?php
 /**
- *  Mysql方式操作MYSQL数据库类
+ *  Mysql操作MYSQL数据库类
  *  @author liubo  2017-06-20
  */
-require_once dirname(__FILE__).'/database.class.php';
+require_once dirname(__FILE__).'/MysqlDriver.class.php';
 
-class Mysql extends database
+class MysqlMysqlDriver extends MysqlDriver
 {
 
-	public $conn; //数据库连接标识;
+	public $conn; //数据库连接方式;
 
 	/*构造函数*/
 	public function __construct($db_host,$db_port, $db_user, $db_pwd, $db_database, $coding='utf8', $conn='pconn')
@@ -26,10 +26,10 @@ class Mysql extends database
 	protected function _connect() 
 	{
 		if ($this->conn == "pconn") {
-			//永久链接
+			//长链接
 			$this->DB = mysql_pconnect($this->db_host, $this->db_user, $this->db_pwd);
 		} else {
-			//即使链接
+			//短链接
 			$this->DB = mysql_connect($this->db_host, $this->db_user, $this->db_pwd);
 		}
 
@@ -42,10 +42,11 @@ class Mysql extends database
 	}
 
 	/*数据库执行语句，可执行查询添加修改删除等任何sql语句*/
-	public function _query($sql) 
+	protected function _query($sql) 
 	{
-		if (empty($sql)) {
-			$this->error_info = "SQL语句错误：SQL查询语句为空";
+		if (empty($sql)) 
+		{
+			$this->error_info = "SQL statement error : empty SQL statement";
 			return false;
 		}
 
@@ -55,7 +56,7 @@ class Mysql extends database
 
 		if (!$this->query) 
 		{
-			$this->error_info = "错误SQL语句：" . mysql_errno() . mysql_error();
+			$this->error_info = "MySQL query error : " . mysql_errno() . mysql_error();
 			return false;
 		} 
 
@@ -63,7 +64,7 @@ class Mysql extends database
 	}
 
 	//获取关联数组,使用$row['字段名']
-	public function _fetch($type='one') 
+	protected function _fetch($type='one') 
 	{
 		$result = array();
         switch ($type)
@@ -85,7 +86,7 @@ class Mysql extends database
 	}
 
 	//获取关联数组,使用$row['字段名']
-	public function _close() 
+	protected function _close() 
 	{
 		mysql_close($this->DB);
 	}

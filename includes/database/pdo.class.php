@@ -3,10 +3,11 @@
  *  PDO操作MYSQL数据库类
  *  @author liubo  2017-06-20
  */
-require_once dirname(__FILE__).'/database.class.php';
+require_once dirname(__FILE__).'/MysqlDriver.class.php';
 
-class PdoMysql extends database
+class PdoMysqlDriver extends MysqlDriver
 {
+    
     public static $db_type = 'mysql';
     public static $connect = true; // 是否長连接
     
@@ -51,7 +52,7 @@ class PdoMysql extends database
     /**
      * 关闭数据连接
      */
-    public function _close() 
+    protected function _close() 
     {
         $this->DB = null;
     }
@@ -61,7 +62,7 @@ class PdoMysql extends database
      * @param $type int 操作类型  0获取1条  1获取全部
      * @return array=>正常查询结果   bool(false)=>查询失败
      */
-    public function _query($sql)
+    protected function _query($sql)
     {
         $this->sql = $sql;
         $this->query = $this->DB->query($this->sql);
