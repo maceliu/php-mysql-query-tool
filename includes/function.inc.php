@@ -3,10 +3,11 @@
 //将二维数组形式的查询结果生成HTML表格格式
 function data_to_chart($data)
 {
-	if (empty($data)) 
+	if (empty($data) || empty($data[0]))
 	{
 		return false;
 	}
+
 	$count = count($data);
 	$html = '<table border="1" cellspacing="1" cellSpacing="1" align="left" style="margin-left:10px;">';
 	$html .= '<tr>';			

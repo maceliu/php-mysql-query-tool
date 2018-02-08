@@ -10,26 +10,28 @@ class MysqliMysqlDriver extends MysqlDriver
     
     public static $db_host_port = '';
 
-    //私有的构造方法
-    public function __construct($db_host,$db_port,$db_user,$db_pass,$db_database,$charset='utf8')
+    /**
+     * 构造函数
+     */
+    public function __construct($db_host,$db_port,$db_user,$db_pwd,$db_database,$charset='utf8')
     {
-        $this->db_host = $db_host;
+        echo 'mysqli';
+        parent::__construct($db_host,$db_port,$db_user,$db_pwd,$db_database,$charset);
         self::$db_host_port = empty($db_port) ? $this->db_host : $this->db_port.':'.$db_port;
-        $this->db_user = $db_user;
-        $this->db_pass = $db_pass;
-        $this->db_database = $db_database;
-        $this->charset= $charset;
         //连接数据库
         $this->_connect();
     }
 
-    //连接数据库
+    /**
+     * 创建数据库连接
+     * @return bool 连接是否成功  true=>成功   false=>失败
+     */
     protected function _connect()
     {
         mysqli_report(MYSQLI_REPORT_STRICT);
         try
         {
-            $this->DB = new mysqli(self::$db_host_port,$this->db_user,$this->db_pass,$this->db_database);
+            $this->DB = new mysqli(self::$db_host_port,$this->db_user,$this->db_pwd,$this->db_database);
             //设置字符集
             $this->_query("set names {$this->charset}");
             //选择数据库
@@ -43,45 +45,45 @@ class MysqliMysqlDriver extends MysqlDriver
         }
     }
 
-    //执行sql语句的方法
+    /**
+     * 执行一条SQL语句
+     * @param $sql str 要执行的SQL语句
+     * @return array=>执行成功   bool(false)=>执行失败
+     */
     protected function _query($sql)
     {
-        $this->query = mysqli_query($this->DB,$sql);
-        if(!$this->query)
+        $this->query = $this->DB->query($sql);
+        if($this->DB->errno)
         {
-            $this->error_info = 'MySQL Query Error : '.mysqli_errno($this->DB).mysqli_error($this->DB);
+            $this->error_info = 'MySQL query error : '.$this->DB->errno.' '.$this->DB->error;
             return false;
         }
         return true;
     }
 
-    //执行sql语句的方法
+    /**
+     * 返回结果的数据
+     * @param $type str 操作类型  one获取1条  all获取全部
+     * @return array=>正常查询结果   bool(false)=>查询失败
+     */
     protected function _fetch($type='one')
     {
         $result = array();
         switch ($type)
         {
             case 'one':
-                $result = mysqli_fetch_assoc($this->query);
+                $result = $this->query->fetch_assoc();
                 break;
             case 'all':
-                while ($result_temp = mysqli_fetch_assoc($this->query)) 
-                {
-                    $result[] = $result_temp;
-                }
+                $result = $this->query->fetch_all(MYSQLI_ASSOC);
                 break;
             default:
+                $this->error_info = 'Fetch type error!';
                 return false;
         }
         return $result;
     }
-
-    //执行sql语句的方法
-    protected function _close()
-    {
-        mysqli_close($this->DB);
-    }
-    
+ 
     /**
      * 返回上一次执行的SQL影响的数据行数
      * @return int 影响行数
@@ -92,11 +94,20 @@ class MysqliMysqlDriver extends MysqlDriver
     }
 
     /**
+     * 关闭数据连接
+     */
+    protected function _close()
+    {
+        $this->DB->close();
+    }
+
+    /**
      * 析构函数
      */
     public function __destruct() 
     {
         self::_close();
     }
+
 }
 ?>

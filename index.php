@@ -1,9 +1,11 @@
 <?php
 require_once dirname(__FILE__).'/config.php';
 require_once dirname(__FILE__).'/includes/function.inc.php';
-require_once dirname(__FILE__).'/includes/database/pdo.class.php';
-require_once dirname(__FILE__).'/includes/database/mysqli.class.php';
-require_once dirname(__FILE__).'/includes/database/mysql.class.php';
+require_once dirname(__FILE__).'/includes/database/Pdo.class.php';
+require_once dirname(__FILE__).'/includes/database/Mysqli.class.php';
+require_once dirname(__FILE__).'/includes/database/Mysql.class.php';
+require_once dirname(__FILE__).'/includes/database/DbStrategy.class.php';
+
 //获取传参
 $host = _getRequest('host','localhost');
 $database = _getRequest('database','php_test');
@@ -43,14 +45,13 @@ else
 		else
 		{
 			//标记开始执行时间
-			$_callStartTime = microtime(true);
+			$query_start_time = microtime(true);
 			//执行查询
 			$item_list = $db->getAll($sql);
 			//获取执行结束时间
-			$_callEndTime = microtime(true);
+			$query_end_time = microtime(true);
 			//计算执行耗时
-			$_callTime = $_callEndTime - $_callStartTime;
-			$times_count =  sprintf('%.4f',$_callTime);
+			$query_time = sprintf('%.4f',($query_end_time - $query_start_time));
 			//如果查询结果不是数组说明执行报错，尝试获取报错信息
 			if ($item_list === false)
 			{
@@ -58,12 +59,13 @@ else
 			}
 			else
 			{	
+				$show_count = count($item_list);
 				//将执行结果数组转化成HTML格式字符串
 				$table_html = data_to_chart($item_list);
 				//获取本次执行影响数据行数
 				$rows_count = $db->getRowCount();
 				//生成执行基本信息列
-				$head_html = '<div>影响行数：'.$rows_count.'行    用时：'.$times_count.'秒</div>';
+				$head_html = '<div>影响行数：'.$rows_count.'行，查询结果行数：'.$show_count.'    用时：'.$query_time.'秒</div>';
 			}
 		}
 	}

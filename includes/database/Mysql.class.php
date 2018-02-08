@@ -8,62 +8,72 @@ require_once dirname(__FILE__).'/MysqlDriver.class.php';
 class MysqlMysqlDriver extends MysqlDriver
 {
 
-	public $conn; //数据库连接方式;
+	public static $db_host_port = '';
+	public static $conn = 'pconn'; //数据库连接方式;
 
-	/*构造函数*/
-	public function __construct($db_host,$db_port, $db_user, $db_pwd, $db_database, $coding='utf8', $conn='pconn')
+	/**
+     * 构造函数
+     */
+	public function __construct($db_host,$db_port,$db_user,$db_pwd,$db_database,$charset='utf8')
 	{
-		$this->db_host = $db_host;
-		$this->db_user = $db_user;
-		$this->db_pwd = $db_pwd;
-		$this->db_database = $db_database;
-		$this->conn = $conn;
-		$this->coding = $coding;
+		echo 'mysql';
+		parent::__construct($db_host,$db_port,$db_user,$db_pwd,$db_database,$charset);
+		self::$db_host_port = empty($db_port) ? $this->db_host : $this->db_port.':'.$db_port;
+		//连接数据库
 		$this->_connect();
 	}
 
-	/*数据库连接*/
+	/**
+     * 创建数据库连接
+     * @return bool 连接是否成功  true=>成功   false=>失败
+     */
 	protected function _connect() 
 	{
-		if ($this->conn == "pconn") {
+		if (self::$conn == "pconn") 
+		{
 			//长链接
-			$this->DB = mysql_pconnect($this->db_host, $this->db_user, $this->db_pwd);
-		} else {
+			$this->DB = mysql_pconnect(self::$db_host_port, $this->db_user, $this->db_pwd);
+		} 
+		else 
+		{
 			//短链接
-			$this->DB = mysql_connect($this->db_host, $this->db_user, $this->db_pwd);
+			$this->DB = mysql_connect(self::$db_host_port, $this->db_user, $this->db_pwd);
 		}
 
-		if (!mysql_select_db($this->db_database, $this->DB)) {
+		if (!mysql_select_db($this->db_database, $this->DB)) 
+		{
 			$this->error_info = mysql_errno() . mysql_error();
 			return false;
 		}
-		mysql_query("SET NAMES $this->coding");
+		mysql_query("SET NAMES $this->charset");
 		return true;
 	}
 
-	/*数据库执行语句，可执行查询添加修改删除等任何sql语句*/
+	/**
+     * 执行一条SQL语句
+     * @param $sql str 要执行的SQL语句
+     * @return array=>执行成功   bool(false)=>执行失败
+     */
 	protected function _query($sql) 
 	{
-		if (empty($sql)) 
-		{
-			$this->error_info = "SQL statement error : empty SQL statement";
-			return false;
-		}
-
 		$this->sql = $sql;
 
 		$this->query = mysql_query($this->sql, $this->DB);
 
-		if (!$this->query) 
+		if (mysql_errno()) 
 		{
-			$this->error_info = "MySQL query error : " . mysql_errno() . mysql_error();
+			$this->error_info = "MySQL query error : " . mysql_errno() .' '. mysql_error();
 			return false;
-		} 
+		}
 
 		return true;
 	}
 
-	//获取关联数组,使用$row['字段名']
+	/**
+     * 返回结果的数据
+     * @param $type str 操作类型  one获取1条  all获取全部
+     * @return array=>正常查询结果   bool(false)=>查询失败
+     */
 	protected function _fetch($type='one') 
 	{
 		$result = array();
@@ -79,17 +89,13 @@ class MysqlMysqlDriver extends MysqlDriver
                 }
                 break;
             default:
-            	$this->error_info = '获取fetch错误！';
+            	$this->error_info = 'Fetch type error!';
                 return false;
         }
         return $result;
 	}
 
-	//获取关联数组,使用$row['字段名']
-	protected function _close() 
-	{
-		mysql_close($this->DB);
-	}
+	
 
 	/**
      * 返回上一次执行的SQL影响的数据行数
@@ -100,8 +106,17 @@ class MysqlMysqlDriver extends MysqlDriver
         return mysql_affected_rows();
     }
 
-
-	//析构函数，自动关闭数据库,垃圾回收机制
+    /**
+     * 关闭数据连接
+     */
+	protected function _close() 
+	{
+		mysql_close($this->DB);
+	}
+	
+	/**
+     * 析构函数
+     */
 	public function __destruct() 
 	{
 		$this->_close();

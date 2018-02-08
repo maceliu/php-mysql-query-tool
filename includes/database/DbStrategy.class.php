@@ -1,9 +1,9 @@
 <?php
 
-class db_strategy {
+class DbStrategy {
 
 	/*构造函数*/
-	public function __construct($db_host, $db_user, $db_pwd, $db_database, $conn, $coding) 
+	public function __construct($db_driver='auto',$db_config_arr) 
 	{
 		
 	}
