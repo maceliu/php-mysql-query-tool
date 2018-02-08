@@ -33,7 +33,7 @@ class PdoMysqlDriver extends MysqlDriver
             $this->DB = new PDO(self::$db_type . ':host=' . $this->db_host . ';port=' . $this->db_port . ';dbname=' . $this->db_database, $this->db_user, $this->db_pwd, array (PDO::ATTR_PERSISTENT => self::$connect));
             if ($this->DB) 
             {
-                $this->DB->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY,true);
+                $this->DB->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY,false);
                 $this->DB->setAttribute(PDO::ATTR_EMULATE_PREPARES,true);
                 $sql = 'SET NAMES ' . $this->charset;
                 self::_query($sql);

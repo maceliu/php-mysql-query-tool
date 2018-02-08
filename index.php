@@ -1,10 +1,7 @@
 <?php
 require_once dirname(__FILE__).'/config.php';
 require_once dirname(__FILE__).'/includes/function.inc.php';
-require_once dirname(__FILE__).'/includes/database/Pdo.class.php';
-require_once dirname(__FILE__).'/includes/database/Mysqli.class.php';
-require_once dirname(__FILE__).'/includes/database/Mysql.class.php';
-require_once dirname(__FILE__).'/includes/database/DbStrategy.class.php';
+require_once dirname(__FILE__).'/includes/database/DbFactory.class.php';
 
 //获取传参
 $host = _getRequest('host','localhost');
@@ -35,9 +32,14 @@ else
 	if (!empty($sql)) 
 	{
 		//连接数据库
-		$db = new PdoMysqlDriver($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
-		// $db = new MysqliMysqlDriver($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
-		// $db = new MysqlMysqlDriver($database_use['host'],$database_use['port'],$database_use['user'],$database_use['pass'],$database_use['db'],$database_use['charset']);
+		$DbFactory = new DbFactory();
+		$db = $DbFactory->createDriver($database_use,'auto');
+		if (!$db) 
+		{
+			echo $DbFactory->error_info;
+			exit;
+		}
+
 		if ($db->error_info) 
 		{
 			$notice = $db->error_info;
