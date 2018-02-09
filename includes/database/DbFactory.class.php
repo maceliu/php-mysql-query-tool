@@ -27,7 +27,7 @@ class DbFactory
         {
             require_once $include_file_path;
             $driver_class_name = $db_driver_selected.'MysqlDriver';
-            if (class_exists($driver_class_name)) 
+            if (class_exists($driver_class_name,false)) 
             {
                 $driver_obj = new $driver_class_name($db_config_arr['host'],$db_config_arr['port'],$db_config_arr['user'],$db_config_arr['pass'],$db_config_arr['db'],$db_config_arr['charset']);
                 return $driver_obj;
@@ -106,7 +106,7 @@ class DbFactory
      */
     public function Pdo()
     {
-        return class_exists('PDO') ? true : false;
+        return class_exists('PDO',false) ? true : false;
     }
 
     /**
@@ -115,7 +115,7 @@ class DbFactory
      */
     public function Mysqli()
     {
-        return class_exists('mysqli') ? true : false;
+        return class_exists('mysqli',false) ? true : false;
     }
 
 
