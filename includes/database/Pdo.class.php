@@ -9,14 +9,13 @@ class PdoMysqlDriver extends MysqlDriver
 {
     
     public static $db_type = 'mysql';
-    public static $connect = true; // 是否長连接
+    public static $connect = false; // 是否长连接
     
     /**
      * 构造函数
      */
     public function __construct($db_host,$db_port,$db_user,$db_pwd,$db_database,$charset='utf8') 
     {
-        echo 'pdo';
         parent::__construct($db_host,$db_port,$db_user,$db_pwd,$db_database,$charset);
         //连接数据库
         $this->_connect();
